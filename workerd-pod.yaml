@@ -1,0 +1,20 @@
+kind: Pod
+metadata:
+  labels:
+    app: workerd-pod
+  name: workerd-pod
+spec:
+  containers:
+  - name: publisher
+    image: publisher 
+    env:
+    - name: DATA_PATH
+      value: "/"
+    ports:
+    - containerPort: 3000 
+      hostPort: 8081
+  - name: worker
+    image: worker
+    ports:
+    - containerPort: 8080
+      hostPort: 8080
