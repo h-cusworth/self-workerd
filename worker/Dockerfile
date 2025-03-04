@@ -49,5 +49,5 @@ COPY --from=build /app/workerd .
 
 EXPOSE 3000
 
-ENV PUBLISHER_ENDPOINT http://host.docker.internal:3001
+ENV PUBLISHER_ENDPOINT http://localhost:3000
 ENTRYPOINT [ "./entrypoint.sh" ]
