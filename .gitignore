@@ -92,3 +92,9 @@ $RECYCLE.BIN/
 .directory
 .Trash-*
 .nfs*
+
+# certs
+*.pem
+
+# archives
+*.zip
