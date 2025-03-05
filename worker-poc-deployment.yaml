@@ -51,11 +51,16 @@ spec:
           image: localhost/publisher
           env:
             - name: DATA_PATH
-              value: "/"
+              value: "/app/publisher/data"
           ports:
             - containerPort: 3000
-              hostPort: 3000
-
+          volumeMounts:
+            - name: publisher-volume  # Reference the volume defined below
+              mountPath: /app/publisher/data
+      volumes:
+        - name: publisher-volume
+          persistentVolumeClaim:
+            claimName: publisher-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -68,4 +73,31 @@ spec:
     - protocol: TCP
       port: 3000
       targetPort: 3000
-
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: publisher-pvc
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  volumeMode: Filesystem
+  hostPath:
+    path: /mnt/data/publisher
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: publisher-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: manual
