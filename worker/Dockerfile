@@ -49,5 +49,5 @@ COPY --from=build /app/workerd .
 
 EXPOSE 3000
 
-ENV PUBLISHER_ENDPOINT http://localhost:3000
+ENV PUBLISHER_ENDPOINT publisher-service:3000
 ENTRYPOINT [ "./entrypoint.sh" ]

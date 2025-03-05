@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+        - name: worker
+          image: localhost/worker
+          ports:
+            - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-service
+spec:
+  selector:
+    app: worker
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: publisher-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: publisher
+  template:
+    metadata:
+      labels:
+        app: publisher
+    spec:
+      containers:
+        - name: publisher
+          image: localhost/publisher
+          env:
+            - name: DATA_PATH
+              value: "/"
+          ports:
+            - containerPort: 3000
+              hostPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: publisher-service
+spec:
+  selector:
+    app: publisher
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+
