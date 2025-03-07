@@ -1,4 +1,4 @@
-FROM node:18-slim
+FROM node:18-slim AS build
 
 
 #
@@ -9,6 +9,8 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -qy libc++1 && \
     apt-get clean
 
+COPY thehutgroup.pem /thehutgroup.pem
+ENV NODE_EXTRA_CA_CERTS=/thehutgroup.pem
 RUN npm install -g pnpm@8.6
 
 WORKDIR /app
@@ -42,10 +44,10 @@ RUN apt-get update && \
 WORKDIR /app
 
 COPY worker/entrypoint.sh .
-COPY --from=0 /app/worker/dist config
-COPY --from=0 /app/workerd .
+COPY --from=build /app/worker/dist config
+COPY --from=build /app/workerd .
 
 EXPOSE 3000
 
-ENV PUBLISHER_ENDPOINT http://host.docker.internal:3001
+ENV PUBLISHER_ENDPOINT publisher-service:3000
 ENTRYPOINT [ "./entrypoint.sh" ]

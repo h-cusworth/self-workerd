@@ -9,10 +9,7 @@ export const publish = httpCall(
     Validate(WorkerDefinitionSchema),
     async (definition: WorkerDefinition) => {
 
-        // steps
-        // 1- write the definition
-        // 2- restart all running workers
-
+        // write the definition
         const logger = useLogger();
 
         const dataPath = useInjected("ENV:DATA_PATH");
@@ -20,30 +17,6 @@ export const publish = httpCall(
         await fs.writeFile(path.join(dataPath, definition.name + ".json"), JSON.stringify(definition), "utf-8");
 
         logger.info("Published worker %s", definition.name);
-
-        // run restart in the bg
-        // we don't need to wait to be completed
-        Promise.resolve().then(async () => {
-            const workerApp = useInjected("ENV:FLY_WORKER_APP");
-            logger.verbose("Restarting app %s", workerApp);
-
-            const machines = await flyApi(`/v1/apps/${workerApp}/machines`);
-
-            for (const machine of machines) {
-                // skip non started machine
-                if (machine.state !== "started") continue;
-
-                logger.verbose("Machine %s: restarting", machine.id);
-
-                await flyApi(`/v1/apps/${workerApp}/machines/${machine.id}/stop`, null);
-                await new Promise(r => setTimeout(r, 2000));
-                await flyApi(`/v1/apps/${workerApp}/machines/${machine.id}/start`, null);
-
-                logger.verbose("Machine %s: restarted", machine.id);
-            }
-        }).catch(err => {
-            logger.error(err);
-        });
 
         return { success: true };
     }
